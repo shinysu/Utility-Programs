@@ -1,34 +1,35 @@
-import requests
-from bs4 import BeautifulSoup
-import re
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+CHROME_PATH = '/Users/shinysuresh/Documents/chromedriver'
 
 
-def clean_link(link):
-    clean = re.search('\/url\?q\=(.*)\&sa', link)
-    if clean is None:
-        return False
-    else:
-        return clean.group(1)
+def get_link_description():
+    try:
+        snippet = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="kp-wp-tab-overview"]/div[1]/div/div/div/div/div[1]/div/div/div/span[1]'))
+        )
+        print(snippet.text)
+        link = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, '//*[@id="kp-wp-tab-overview"]/div/div/div/div/div/div/div/div/div/span[2]/a'))
+        )
 
-
-def get_snippet(url):
-    page = requests.get(url)
-    soup = BeautifulSoup(page.text, 'html.parser')
-    result_div = soup.find_all('div', attrs={'class': 'ZINbbc'})
-    for r in result_div:
-        try:
-            link = r.find('a', href=True)
-            description = r.find('div', attrs={'class': 's3v9rd'}).get_text()
-            link = clean_link(link['href'])
-            if clean_link:
-                print(description)
-                print(link)
-                break
-        except:
-            continue
+        print(link.get_attribute('href'))
+        driver.quit()
+    except Exception as e:
+        print(e)
+        driver.quit()
 
 
 word = input("Enter the search term: ")
-search_query = "define " + word
-url = 'https://google.com/search?q=' + search_query
-get_snippet(url)
+search_query = "define+" + word
+options = Options()
+options.headless = True
+driver = webdriver.Chrome(CHROME_PATH, options=options)
+driver.get('https://google.com/search?q='+search_query)
+get_link_description()
+
