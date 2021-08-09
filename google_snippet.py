@@ -21,7 +21,7 @@ def get_link_description():
         print(link.get_attribute('href'))
         driver.quit()
     except Exception as e:
-        print(e)
+        print("No snippet found")
         driver.quit()
 
 
